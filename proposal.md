@@ -28,7 +28,7 @@ Scenario 1: Provider publishing a full dump of their datasets in Turtle format:
   dcterms:title "DataOne Full Dump" ;
   dcterms:description "A Linked Open Data graph of the holdings in DataOne produced for the GeoLink project." ;
   void:feature <http://www.w3.org/ns/formats/Turtle> ;
-  void:feature <http://lod.dataone.org/glharvest#FullDump> ;
+  void:feature <http://harvest.dataone.org/glharvest#FullDump> ;
   void:dataDump <http://lod.dataone.org/dataone.ttl> ;
   dcterms:modified "2015-11-05"^^xsd:date ;
   .
@@ -46,7 +46,7 @@ Scenario 2: Provider publishing a full and partial dump of their datasets, both 
   dcterms:title "DataOne Full Dump" ;
   dcterms:description "A Linked Open Data graph of the holdings in DataOne produced for the GeoLink project." ;
   void:feature <http://www.w3.org/ns/formats/Turtle> ;
-  void:feature <http://lod.dataone.org/glharvest#FullDump> ;
+  void:feature <http://harvest.dataone.org/glharvest#FullDump> ;
   void:dataDump <http://lod.dataone.org/dataone.ttl> ;
   dcterms:modified "2015-11-05"^^xsd:date ;
   .
@@ -55,7 +55,7 @@ Scenario 2: Provider publishing a full and partial dump of their datasets, both 
   dcterms:title "DataOne Partial Dump" ;
   dcterms:description "A partial Linked Open Data graph of the holdings in DataOne produced for the GeoLink project." ;
   void:feature <http://www.w3.org/ns/formats/Turtle> ;
-  void:feature <http://lod.dataone.org/glharvest#PartialDump> ;
+  void:feature <http://harvest.dataone.org/glharvest#PartialDump> ;
   void:dataDump <http://lod.dataone.org/dataone.ttl> ;
   dcterms:modified "2015-11-05"^^xsd:date ;
   .
