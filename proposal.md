@@ -1,112 +1,112 @@
-# Harvester Proposal
+# Harvest System Proposal
 
 This proposal describes Harvester Service for the GeoLink project.
 
-The Harvester Service serves the purpose of keeping the unified (all members)
-GeoLink graph up to date with the graphs from GeoLink member repositories. To do
-this, the Harvester Service retrieves graphs from GeoLink member repositories
-and imports them into a central triple store.
-
+The Harvest Service retrieves RDF dumps of the datasets from a set of providers and ingests the triples from each RDF dump into separate named graphs in a single triple store.
+The named graphs are then exposed via a SPARQL endpoint for further processing.
 
 ## Harvesting From Member Repositories
 
 **What exactly will be located at each member repository?**
 
-Each member repository is responsible for maintaining a single graph which
-contains triples for information that has been updated since the harvester
-service last visited that member repository. The need of just the changed
-triples rather than all triples is one of efficiency. Member repository graphs
-may contain millions of triples but the vast majority of these will only need to
-be imported into the central triple store once and never changed. By requiring
-member repositories to maintain only a set of only the triples that have changed
-since the Harvester Service last visited the member repository, we reduce the
-time it will take to retrieve graphs from the member repositories and integrate
-those changes into the Harvester's central triple store
+Each provider maintains a complete dump and may optionally maintain a partial dump of their datasets which contains only datasets that have been updated since the Harvest Service last retrieved the provider's partial dump.
+Maintaining a partial dump is recommended for providers whose data holdings may change often and/or contain a large number of triples (most of which do not change often).
+Each dump file must be made accessible to the Harvest Service in such a way as to make it retrievable using a tool such as `rsync`.
+
+Providers also maintain a [VoID file](http://www.w3.org/TR/void/#void-file) at their site which contains a description of their full dump and optionally their partial dump.
+Two example VoID files illustrate the structure of a VoID file for (1) a provider publishing a full dump and (2) a provider publishing both full and partial dumps of their datasets.
+
+Scenario 1: Provider publishing a full dump of their datasets in Turtle format:
+
+```{ttl}
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix : <#> .
+
+:#d1lodfull a void:Dataset ;
+  dcterms:title "DataOne Full Dump" ;
+  dcterms:description "A Linked Open Data graph of the holdings in DataOne produced for the GeoLink project." ;
+  void:feature <http://www.w3.org/ns/formats/Turtle> ;
+  void:feature <http://lod.dataone.org/glharvest#FullDump> ;
+  void:dataDump <http://lod.dataone.org/dataone.ttl> ;
+  dcterms:modified "2015-11-05"^^xsd:date ;
+  .
+```
+
+Scenario 2: Provider publishing a full and partial dump of their datasets, both in Turtle format:
+
+```{ttl}
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix : <#> .
+
+:#d1lodfull a void:Dataset ;
+  dcterms:title "DataOne Full Dump" ;
+  dcterms:description "A Linked Open Data graph of the holdings in DataOne produced for the GeoLink project." ;
+  void:feature <http://www.w3.org/ns/formats/Turtle> ;
+  void:feature <http://lod.dataone.org/glharvest#FullDump> ;
+  void:dataDump <http://lod.dataone.org/dataone.ttl> ;
+  dcterms:modified "2015-11-05"^^xsd:date ;
+  .
+
+:#d1lodpartial a void:Dataset ;
+  dcterms:title "DataOne Partial Dump" ;
+  dcterms:description "A partial Linked Open Data graph of the holdings in DataOne produced for the GeoLink project." ;
+  void:feature <http://www.w3.org/ns/formats/Turtle> ;
+  void:feature <http://lod.dataone.org/glharvest#PartialDump> ;
+  void:dataDump <http://lod.dataone.org/dataone.ttl> ;
+  dcterms:modified "2015-11-05"^^xsd:date ;
+  .
+```
+
+Note the use of `<http://lod.dataone.org/glharvest#FullDump>` and `<http://lod.dataone.org/glharvest#PartialDump>`.
+These are `void:TechnicalFeature`s described in a custom ontology hosted at `<http://lod.dataone.org/glharvest>` which describe the concept of full and partial dumps, respectively.
+
+The [VoID spec](http://www.w3.org/TR/void/) describes other properties that may be added to the VoID file such as `foaf:homepage` or `dcterms:publisher`.
+These properties may be specified in the VoID file but are not specifically needed for the Harvest System.
 
 
 **How will harvesting be coordinated?**
 
-The Harvester Service needs to know where to find a graph at a member repository
-and which named graph to import it into in the central triple store. Rather than
-hard-code this information into the service, we will use existing semantics from
-the [SPARQL 1.1 Service
-Description](http://www.w3.org/TR/sparql11-service-description/) specification,
-which extends work from the [VoID
-Vocabulary](http://www.w3.org/TR/2011/NOTE-void-20110303/), to describe the
-member repository graphs and instruct the Harvester Service on how to harvest
-triples from them.
+The Harvest System maintains a list of URIs for each provider's VoID file in a single registry file that is manually updated in order to register a new provider with the service.
+Along with the URI for the VoID file, the most recent `dcterms:modified` value for the the dump (full or partial) is saved and only dumps with a modification date after this value are harvested.
 
-```{ttl}
-<#GeolinkSPARQL> a sd:Service;
-    sd:url <http://data.geolink.org/sparql>;
-    sd:defaultDatasetDescription [
-        a sd:Dataset;
-        dcterms:title “GeoLink Public SPARQL Endpoint";
-        dcterms:description "A good description of GeoLink";
-        sd:defaultGraph [
-            a sd:Graph, void:Dataset;
-            dcterms:title “GeoLink Graph and Dataset Descriptions";
-            dcterms:description "Contains a copy of this SD+VoID file!";
-        ];
-        sd:namedGraph [
-            sd:name <http://data.geolink.org/id/r2r>;
-            sd:graph [
-                a sd:Graph, void:Dataset;
-                dcterms:title “R2R Graph";
-                void:dataDump <http://wsu.edu/r2r_enhanced_dump.rdf>;
-            ];
-        ];
-```
+Harvesting is conducted every 24 hours by parsing the URIs from the registry file and adding each URI to a queue.
 
-The Harvester Service will query the GeoLink SPARQL endpoint for named graphs at
-some interval and visit the data dumps it finds, processing the graphs and
-importing triples from them.
+When an item in the queue is processed, the Harvest System:
 
+- Visits the VoID file given by the URI
+- Parses the VoID file to determine the type, location, and last modified date of the dump
+- Checks the `dcterms:modified` value with the stored value
 
-## Updating the Central Triple Store
+If the dump hasn't been updated since the last visit, no work is done and the next item in the queue, if any, is processed.
+If the dump has been been updated since the last visit, the Harvest System:
+
+- Stores the last modified date of the dump in the registry file
+- Copies the dump from the provider to the Harvest System
+- Processes the dump (described below)
 
 **How will the the triples be processed?**
 
-When the Harvester Service visits a member repository, it may find either an
-empty or non-empty graph of changed triples. When it finds a non-empty graph of
-changed triples, it should make a list of all of the unique subjects of those
-triples, delete from the central triple store all triples with those subjects,
-and finish by adding the changed triples to the central triple store.
+If the dump is a full dump and a partial dump is not made available at the provider, all triples in the provider's named graph are removed and replaced with the triples
+from the retrieved dump.
 
-This can be illustrated in an example. If the central triple store contains
-information on three people and their names,
+If the dump is a partial dump, the Harvest System imports the triples from the dump into a temporary named graph, queries the named graph for the unique set of subjects of the triples in the temporary named graph and deletes any triples in the provider's named graph that have those subjects.
+Then the triples from the temporary named graph are copied directly into the provider's named graph.
 
-```{ttl}
-# Central triple store
-example:Bob foaf:name 'Bob' .
-example:Alice foaf:name 'Alice' .
-example:Jane foaf:name 'Jane' .
-```
+## SPARQL Endpoint
 
-And a member repository needs to add that the person also has an email address,
+The set of named graphs in the central triple store are available via a SPARQL endpoint and a corresponding [SPARQL Service Description](http://www.w3.org/TR/sparql11-service-description/#sd-Dataset) file that describes the datasets held in the central triple store.
+The SPARQL service description is used by other groups to perform co-referenced resolution and other forms of post-processing.
 
-```{ttl}
-# Member graph
-example:Alice foaf:name 'Alice' ;
-              foaf:mbox <alice@example.org> .
-```
+## Infrastructure
 
-then the triple `example:Alice foaf:name 'Alice'` in the central triple store
-would be deleted because it has the subject `example:Alice` (which is in the
-member graph). Then the two triples about Alice from the member graph would be
-inserted into the central triple store.
+The Harvest System runs on a single virtual machine hosted at UCSB which runs
+the following pieces of software:
 
-In specifying the member graphs this way, we are assuming that, if a particular
-URI exists as a subject in the member graph, that the member graph is presenting
-all the information it knows about that URI and not just information that has
-changed since the graph was last generated. If the member graph had contained
-only the following triple:
-
-```{ttl}
-# Member graph
-example:Alice foaf:mbox <alice@example.org> .
-```
-
-Then that would imply that Alice's name is no longer 'Alice' but that she does
-have an email address, `<alice@example.org>` and the central triple store would
-no longer contain a triple that Alice's `foaf:name` is 'Alice'.
+- Triple store: [GraphDB](http://graphdb.ontotext.com/display/GraphDB6/Home)
+- Harvester: Python package
+- Queueing system: Python-based [RQ](http://python-rq.org/) queue running [http://redis.io/](http://redis.io/)
+- SPARQL Endpoint: [Virtuoso](virtuoso.openlinksw.com)
