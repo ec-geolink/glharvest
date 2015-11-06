@@ -11,7 +11,7 @@ The named graphs are then exposed via a SPARQL endpoint for further processing.
 
 Each provider maintains a complete dump and may optionally maintain a partial dump of their datasets which contains only datasets that have been updated since the Harvest Service last retrieved the provider's partial dump.
 Maintaining a partial dump is recommended for providers whose data holdings may change often and/or contain a large number of triples (most of which do not change often).
-Each dump file must be made accessible to the Harvest Service in such a way as to make it retrievable using a tool such as `rsync`.
+Each dump file must be made publicly accessible over HTTP.
 
 Providers also maintain a [VoID file](http://www.w3.org/TR/void/#void-file) at their site which contains a description of their full dump and optionally their partial dump.
 Two example VoID files illustrate the structure of a VoID file for (1) a provider publishing a full dump and (2) a provider publishing both full and partial dumps of their datasets.
