@@ -85,7 +85,9 @@ If the dump hasn't been updated since the last visit, no work is done and the ne
 If the dump has been been updated since the last visit, the Harvest System:
 
 - Stores the last modified date of the dump in the registry file
+- Records the SHA-256 checksum for the file on the provider
 - Copies the dump from the provider to the Harvest System
+- Checks the SHA-256 checksum for the copied file and aborts if the checksums don't match
 - Processes the dump (described below)
 
 **How will the the triples be processed?**
