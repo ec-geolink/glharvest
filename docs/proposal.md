@@ -1,9 +1,16 @@
 # Harvest System Proposal
 This proposal describes Harvester Service for the GeoLink project.
 
+## TODOs
+This document is in progress. Some of the action items are listed below:
+- Discuss how the queue handles backlogs like in the case where it takes four days to process a dump but the provider changes their graph daily and we check for changes daily
+- Discuss access control issues. It's import that a provider can't push changes to another provider's named graph by changing the contents of their VoID dump file. The fix for this could be as simple as making the registration process fix the location of the VoID with a named graph and checking this at harvest-time.
+- The harvest system has to coordinate telling providers that their partial dump has been harvested. Design a solution and include it in the proposal.
+
+## Overview
 The Harvest Service retrieves RDF dumps of the datasets from a set of providers and ingests the triples from each RDF dump into separate named graphs in a single triple store. The named graphs are then exposed via a SPARQL endpoint for further processing.
 
-## Harvesting From Member Repositories
+### Harvesting From Member Repositories
 **What exactly will be located at each member repository?**
 
 Each provider maintains a complete dump and may optionally maintain a partial dump of their datasets which contains only datasets that have been updated since the Harvest Service last retrieved the provider's partial dump. Maintaining a partial dump is recommended for providers whose data holdings may change often and/or contain a large number of triples (most of which do not change often). Each dump file must be made publicly accessible over HTTP.
@@ -19,7 +26,7 @@ Scenario 1: Provider publishing a full dump of their datasets in Turtle format:
 @prefix : <#> .
 
 :#d1lodfull a void:Dataset ;
-  dcterms:title "DataOne Full Dump" ;
+  dcterms:title "DataOne" ;
   dcterms:description "A Linked Open Data graph of the holdings in DataOne produced for the GeoLink project." ;
   void:feature <http://www.w3.org/ns/formats/Turtle> ;
   void:feature <http://harvest.dataone.org/glharvest#FullDump> ;
@@ -67,7 +74,8 @@ Harvesting is conducted every 24 hours by parsing the URIs from the registry fil
 
 When an item in the queue is processed, the Harvest System:
 - Visits the VoID file given by the URI
-- Parses the VoID file to determine the type, location, and last modified date of the dump
+- Parses the VoID file to determine the type, location, and last modified date of the dumps contained within
+- Determine the appropriate dump to process: A partial dump if it exists, otherwise the full dump
 - Checks the `dcterms:modified` value with the stored value
 
 If the dump hasn't been updated since the last visit, no work is done and the next item in the queue, if any, is processed. If the dump has been been updated since the last visit, the Harvest System:
@@ -83,18 +91,18 @@ If the dump is a full dump and a partial dump is not made available at the provi
 
 If the dump is a partial dump, the Harvest System imports the triples from the dump into a temporary named graph, queries the named graph for the unique set of subjects of the triples in the temporary named graph and deletes any triples in the provider's named graph that have those subjects. Then the triples from the temporary named graph are copied directly into the provider's named graph.
 
-## SPARQL Endpoint
-The set of named graphs in the central triple store are available via a SPARQL endpoint and a corresponding [SPARQL Service Description](http://www.w3.org/TR/sparql11-service-description/#sd-Dataset) file that describes the datasets held in the central triple store. The SPARQL service description is used by other groups to perform co-referenced resolution and other forms of post-processing.
+**Overview**
+
+For each provider in the registry, the following steps are taken to update that provider's dump. This task is run every 24 hours.
 
 ![harvester provider diagram](./diagrams/harvester-provider.png)
+
+## SPARQL Endpoint
+The set of named graphs in the central triple store are available via a SPARQL endpoint and a corresponding [SPARQL Service Description](http://www.w3.org/TR/sparql11-service-description/#sd-Dataset) file that describes the datasets held in the central triple store. The SPARQL service description is used by other groups to perform co-referenced resolution and other forms of post-processing.
 
 ## Infrastructure
 The Harvest System runs on a single virtual machine hosted at UCSB which runs the following pieces of software:
 - Triple store: [GraphDB](http://graphdb.ontotext.com/display/GraphDB6/Home)
 - Harvester: Python package
-- Queueing system: Python-based [RQ](http://python-rq.org/) queue running [http://redis.io/](http://redis.io/)
-- SPARQL Endpoint: [Virtuoso](virtuoso.openlinksw.com)
-
-# TODOs
-- Discuss how the queue handles backlogs like in the case where it takes four days to process a dump but the provider changes their graph daily and we check for changes daily
-- Discuss access control issues. It's import that a provider can't push changes to another provider's named graph by changing the contents of their VoID dump file. The fix for this could be as simple as making the registration process fix the location of the VoID with a named graph and checking this at harvest-time.
+- Queueing system: Python-based [RQ](http://python-rq.org/) queue running [Redis](http://redis.io/)
+- SPARQL Endpoint: Either deploy [Virtuoso](virtuoso.openlinksw.com) or simply expose the [Sesame Workbench](http://rdf4j.org/sesame/2.8/docs/articles/workbench.docbook?view)

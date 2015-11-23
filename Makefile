@@ -1,2 +1,4 @@
-docs:
-	$(MAKE) docs/Makefile
+docs: FORCE
+	cd docs && $(MAKE)
+
+FORCE:
