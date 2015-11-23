@@ -86,6 +86,8 @@ If the dump is a partial dump, the Harvest System imports the triples from the d
 ## SPARQL Endpoint
 The set of named graphs in the central triple store are available via a SPARQL endpoint and a corresponding [SPARQL Service Description](http://www.w3.org/TR/sparql11-service-description/#sd-Dataset) file that describes the datasets held in the central triple store. The SPARQL service description is used by other groups to perform co-referenced resolution and other forms of post-processing.
 
+![harvester provider diagram](./diagrams/harvester-provider.png)
+
 ## Infrastructure
 The Harvest System runs on a single virtual machine hosted at UCSB which runs the following pieces of software:
 - Triple store: [GraphDB](http://graphdb.ontotext.com/display/GraphDB6/Home)
