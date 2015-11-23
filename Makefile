@@ -1,0 +1,2 @@
+docs:
+	$(MAKE) docs/Makefile
