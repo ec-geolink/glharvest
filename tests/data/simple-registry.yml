@@ -1,0 +1,6 @@
+d1lod:
+  features:
+    - full
+    - partial
+  modified: 2015-10-12
+  dump: http://lod.dataone.org
