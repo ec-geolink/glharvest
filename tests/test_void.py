@@ -17,7 +17,7 @@ def test_returns_none_if_the_registry_file_is_not_found():
 
 def test_can_load_a_simple_void_file():
     model = util.load_file_into_model('tests/data/simple-void.ttl', 'turtle')
-    p = util.parse_void_model(model)
+    p = void.parse_void_model(m)
 
     assert p == {   'http://lod.dataone.org/test': {
                         'dataDump': 'http://lod.dataone.org/test.ttl',
