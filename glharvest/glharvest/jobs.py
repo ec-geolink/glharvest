@@ -117,6 +117,17 @@ def main_job():
                 print "datadump has not been updated since the last visit. Doing nothing."
 
 
+def export_job():
+    """Export the repository as Turtle."""
+
+    s = Store(SESAME_HOST, SESAME_PORT)
+    r = Repository(s, SESAME_REPOSITORY)
+
+    with open('/www/export', 'wb') as f:
+        exported_text = r.export()
+        f.write(exported_text.encode('utf-8'))
+
+
 def status_job():
     """Gets the status of the system and prints to stdout."""
     print "Getting the status of the system."
