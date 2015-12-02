@@ -3,17 +3,21 @@
 Jobs for the Harvest System.
 """
 
+import os
 import requests
 import datetime
 
 import sys
-sys.path.append('/Users/mecum/src/d1lod/d1lod')
+sys.path.append('/d1lod')
 from d1lod.sesame import Store, Repository
 
 from glharvest import registry, void, util
 
+SESAME_HOST = os.getenv('GRAPHDB_PORT_8080_TCP_ADDR', 'localhost')
+SESAME_PORT = os.getenv('GRAPHDB_PORT_8080_TCP_PORT', '8080')
+SESAME_REPOSITORY = 'test'
 
-def dowork():
+def main_job():
     """The main worker method for the Harvest System.
 
     1. Parse the registry file.
@@ -30,7 +34,11 @@ def dowork():
 
     # Parse registry file
     print "Parsing registry file."
-    regfile = registry.parse_registry_file('registry.yml')
+    regfile = registry.parse_registry_file('/glharvest/registry.yml')
+
+    if regfile is None:
+        print "Failed to parse registry file. Exiting."
+        return
 
     print "  %d provider(s) found." % len(regfile)
 
@@ -94,22 +102,29 @@ def dowork():
                     print "Failed to fetch the void file at `%s`. Skipping." % void_location
                     # continue
 
-                s = Store('localhost')
+                s = Store(SESAME_HOST, SESAME_PORT)
 
                 # if s.hasRepository(provider):
                     # s.deleteRepository(provider)
 
-                sr = Repository(s, 'test')
+                sr = Repository(s, SESAME_REPOSITORY)
                 sr.import_from_text(r.text, context=provider)
 
                 # Update registry file on disk
-                # regfile[provider]['modified'] = datetime.date.today()
-                # registry.save_registry("registry.yml", regfile)
-
-
-
+                regfile[provider]['modified'] = datetime.date.today()
+                registry.save_registry("registry.yml", regfile)
             else:
                 print "datadump has not been updated since the last visit. Doing nothing."
+
+
+def status_job():
+    """Gets the status of the system and prints to stdout."""
+    print "Getting the status of the system."
+
+    s = Store(SESAME_HOST, SESAME_PORT)
+    r = Repository(s, SESAME_REPOSITORY)
+
+    print "Repository size is %d" % r.size()
 
 
 if __name__ == "__main__":
