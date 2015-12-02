@@ -1,11 +1,11 @@
 @startuml
 Harvester -> Provider: Check provider VoID file for changes
 Provider -> Harvester: Provider returns VoID file
-Harvester -> Harvester: Check dump timestamps against registry
+Harvester -> Harvester: Check dump timestamps against existing
 Harvester -> Harvester : If not newer, do nothing
 Harvester -> Provider : If newer, get dump (full/partial)
 Provider -> Harvester: Returns dump
 Harvester -> Harvester: Verify checksum of dumpfile
-Harvester -> Harvester: Delete existing triples and import dump
-Harvester -> Harvester: Save new timestamp in registry
+Harvester -> Harvester: Delete and import dump
+Harvester -> Harvester: Save new timestamp
 @enduml

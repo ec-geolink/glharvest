@@ -3,6 +3,12 @@
 Functionality related to workign with VoID files.
 """
 
+try:
+    import RDF
+except ImportError:
+    import sys
+    sys.path.append('/usr/lib/python2.7/dist-packages/')
+
 import RDF
 
 

@@ -1,6 +1,12 @@
 """util.py
 """
 
+try:
+    import RDF
+except ImportError:
+    import sys
+    sys.path.append('/usr/lib/python2.7/dist-packages/')
+
 import RDF
 
 from os.path import isfile
@@ -48,7 +54,7 @@ def load_string_into_model(rdfstring, format="rdfxml"):
      Returns:
     --------
     RDF.Model or None if an exception occurred
-    """    
+    """
     # Create an empty Model
     model = create_empty_model()
 
@@ -58,7 +64,7 @@ def load_string_into_model(rdfstring, format="rdfxml"):
     except:
         print "Failed to create RDF.Parser."
         return None
-    
+
     # Parse the string into the model
     try:
         parser.parse_string_into_model(model, rdfstring, "example.org")

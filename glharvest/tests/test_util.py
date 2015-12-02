@@ -3,6 +3,12 @@
 Test functions located in the util module.
 """
 
+try:
+    import RDF
+except ImportError:
+    import sys
+    sys.path.append('/usr/lib/python2.7/dist-packages/')
+
 import RDF
 
 from glharvest import util
