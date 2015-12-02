@@ -12,6 +12,8 @@ worker:
       - redis
   volumes:
     - ./www:/www
+    - ./d1lod:/d1lod
+    - ./glharvest:/glharvest
 
 scheduler:
   build: scheduler
@@ -27,8 +29,8 @@ graphdb:
   ports:
     - "8080:8080"
   volumes:
-    - ~/src/d1loddeploy/graphdb/openrdf-sesame/:/usr/local/tomcat/webapps/openrdf-sesame
-    - ~/src/d1loddeploy/graphdb/openrdf-workbench/:/usr/local/tomcat/webapps/openrdf-workbench
+    - ./openrdf-sesame:/usr/local/tomcat/webapps/openrdf-sesame/
+    - ./openrdf-workbench:/usr/local/tomcat/webapps/openrdf-workbench/
 
 redis:
   image: redis:3.0.5
