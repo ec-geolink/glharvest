@@ -23,7 +23,7 @@ scheduler:
   volumes:
     - ./d1lod:/d1lod
     - ./glharvest:/glharvest
-
+    - ./www:/www
 graphdb:
   image: tomcat:8.0-jre8
   ports:
