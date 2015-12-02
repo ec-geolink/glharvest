@@ -3,7 +3,7 @@ This proposal describes Harvester Service for the GeoLink project.
 
 ## TODOs
 This document is in progress. Some of the action items are listed below:
-- Discuss how the queue handles backlogs like in the case where it takes four days to process a dump but the provider changes their graph daily and we check for changes daily
+- Discuss how the queue handles backlogs. For example, if the case arises where it takes four days to process a dump but the provider changes their graph daily and we check for changes daily what do we do?
 - Discuss access control issues. It's import that a provider can't push changes to another provider's named graph by changing the contents of their VoID dump file. The fix for this could be as simple as making the registration process fix the location of the VoID with a named graph and checking this at harvest-time.
 - The harvest system has to coordinate telling providers that their partial dump has been harvested. Design a solution and include it in the proposal.
 
@@ -16,6 +16,13 @@ The Harvest Service retrieves RDF dumps of the datasets from a set of providers 
 Each provider maintains a complete dump and may optionally maintain a partial dump of their datasets which contains only datasets that have been updated since the Harvest Service last retrieved the provider's partial dump. Maintaining a partial dump is recommended for providers whose data holdings may change often and/or contain a large number of triples (most of which do not change often). Each dump file must be made publicly accessible over HTTP.
 
 Providers also maintain a [VoID file](http://www.w3.org/TR/void/#void-file) at their site which contains a description of their full dump and optionally their partial dump. Two example VoID files illustrate the structure of a VoID file for (1) a provider publishing a full dump and (2) a provider publishing both full and partial dumps of their datasets.
+
+For each `void:Dataset` described in a provider's VoID file, the harvest system requires the following properties to do its work (brackets indicate cardinality):
+
+- [1:n] `rdf:type` `void:Dataset`
+  - [1] `dcterms:modified`
+  - [1] `void:feature`
+  - [1] `void:dataDump`
 
 Scenario 1: Provider publishing a full dump of their datasets in Turtle format:
 
@@ -70,19 +77,38 @@ The [VoID spec](http://www.w3.org/TR/void/) describes other properties that may 
 
 The Harvest System maintains a list of URIs for each provider's VoID file in a single registry file that is manually updated in order to register a new provider with the service. Along with the URI for the VoID file, the most recent `dcterms:modified` value for the the dump (full or partial) is saved and only dumps with a modification date after this value are harvested.
 
-Harvesting is conducted every 24 hours by parsing the URIs from the registry file and adding each URI to a queue.
+The registry file looks something like this (YML format):
+
+```{yml}
+d1lod:
+  modified: 2015-10-01
+  void: http://lod.dataone.org/void.ttl
+```
+
+And adding a new provider would require changing the registry file to:
+
+```{yml}
+d1lod:
+  modified: 2015-10-01
+  void: http://lod.dataone.org/void.ttl
+some_provder:
+  modified: 2015-11-15
+  void: http://example.org/void.ttl
+```
+
+Harvesting is conducted every 24 hours by parsing the registry file and adding each URI to a queue.
 
 When an item in the queue is processed, the Harvest System:
 - Visits the VoID file given by the URI
 - Parses the VoID file to determine the type, location, and last modified date of the dumps contained within
-- Determine the appropriate dump to process: A partial dump if it exists, otherwise the full dump
+- Determines the appropriate dump to process: A partial dump if it exists, otherwise the full dump
 - Checks the `dcterms:modified` value with the stored value
 
 If the dump hasn't been updated since the last visit, no work is done and the next item in the queue, if any, is processed. If the dump has been been updated since the last visit, the Harvest System:
 - Stores the last modified date of the dump in the registry file
-- Records the SHA-256 checksum for the file on the provider
-- Copies the dump from the provider to the Harvest System
-- Checks the SHA-256 checksum for the copied file and aborts if the checksums don't match
+- Records a checksum for the file on the provider
+- Retrieves the dump from the provider to the Harvest System
+- Checks the checksum for the copied file and aborts if the checksums don't match
 - Processes the dump (described below)
 
 **How will the the triples be processed?**
@@ -91,18 +117,21 @@ If the dump is a full dump and a partial dump is not made available at the provi
 
 If the dump is a partial dump, the Harvest System imports the triples from the dump into a temporary named graph, queries the named graph for the unique set of subjects of the triples in the temporary named graph and deletes any triples in the provider's named graph that have those subjects. Then the triples from the temporary named graph are copied directly into the provider's named graph.
 
-**Overview**
+**Schematic**
 
 For each provider in the registry, the following steps are taken to update that provider's dump. This task is run every 24 hours.
 
 ![harvester provider diagram](./diagrams/harvester-provider.png)
 
 ## SPARQL Endpoint
+
 The set of named graphs in the central triple store are available via a SPARQL endpoint and a corresponding [SPARQL Service Description](http://www.w3.org/TR/sparql11-service-description/#sd-Dataset) file that describes the datasets held in the central triple store. The SPARQL service description is used by other groups to perform co-referenced resolution and other forms of post-processing.
 
 ## Infrastructure
+
 The Harvest System runs on a single virtual machine hosted at UCSB which runs the following pieces of software:
-- Triple store: [GraphDB](http://graphdb.ontotext.com/display/GraphDB6/Home)
-- Harvester: Python package
+
+- Triple store: [GraphDB](http://graphdb.ontotext.com/display/GraphDB6/Home) via [Sesame Workbench](http://rdf4j.org/sesame/2.8/docs/articles/workbench.docbook?view)
+- Harvester: A custom Python 2.7.10 package
 - Queueing system: Python-based [RQ](http://python-rq.org/) queue running [Redis](http://redis.io/)
 - SPARQL Endpoint: Either deploy [Virtuoso](virtuoso.openlinksw.com) or simply expose the [Sesame Workbench](http://rdf4j.org/sesame/2.8/docs/articles/workbench.docbook?view)
