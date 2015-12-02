@@ -58,5 +58,5 @@ target/
 
 d1lod/
 deploy.sh
-openrdf-sesame/
-openrdf-workbench/
+openrdf-sesame*
+openrdf-workbench*
