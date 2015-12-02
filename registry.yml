@@ -1,6 +1,3 @@
-test1:
-  modified: 2014-11-30
-  void: http://localhost:8000/test1.ttl
-test2:
-  modified: 2014-11-30
-  void: http://localhost:8000/test2.ttl
+d1lod:
+  modified: 2015-10-01
+  void: http://lod.dataone.org/void.ttl
