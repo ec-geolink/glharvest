@@ -38,9 +38,6 @@ def parse_void_model(model):
     dataset_pattern = RDF.Statement(subject=None, predicate=rdf['type'], object=void['Dataset'])
 
     for statement in model.find_statements(dataset_pattern):
-        if not statement.subject.is_resource():
-            continue
-
         subject_string = str(statement.subject)
 
         if subject_string in datasets:
