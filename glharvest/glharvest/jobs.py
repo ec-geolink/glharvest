@@ -102,13 +102,9 @@ def main_job():
                     print "Failed to fetch the void file at `%s`. Skipping." % void_location
                     # continue
 
-                s = Store(SESAME_HOST, SESAME_PORT)
-
-                # if s.hasRepository(provider):
-                    # s.deleteRepository(provider)
-
-                sr = Repository(s, SESAME_REPOSITORY)
-                sr.import_from_text(r.text, context=provider)
+                str = Store(SESAME_HOST, SESAME_PORT)
+                rep = Repository(str, SESAME_REPOSITORY)
+                rep.import_from_text(r.text, context=provider)
 
                 # Update registry file on disk
                 regfile[provider]['modified'] = datetime.date.today()
@@ -136,7 +132,3 @@ def status_job():
     r = Repository(s, SESAME_REPOSITORY)
 
     print "Repository size is %d" % r.size()
-
-
-if __name__ == "__main__":
-    dowork()
