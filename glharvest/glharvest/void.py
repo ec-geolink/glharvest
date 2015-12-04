@@ -90,8 +90,11 @@ def parse_void_model(model):
             print "Skipping"
             continue
 
+        if 'dumps' not in datasets[subject_string]:
+            datasets[subject_string]['dumps'] = []
+
         object_string = str(statement.object)
-        datasets[subject_string]['dataDump'] = object_string
+        datasets[subject_string]['dumps'].append(object_string)
 
 
     return datasets
