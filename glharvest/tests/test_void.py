@@ -26,7 +26,7 @@ def test_can_load_a_simple_void_file():
     p = void.parse_void_model(m)
 
     assert p == {   'http://lod.dataone.org/test': {
-                        'dataDump': 'http://lod.dataone.org/test.ttl',
+                        'dumps': ['http://lod.dataone.org/test.ttl'],
                         'features': [
                             'http://lod.dataone.org/fulldump'
                         ]
