@@ -14,12 +14,12 @@ import RDF
 from glharvest import util
 
 def test_can_load_a_file_into_a_model():
-    parsed = util.load_file_into_model("void-dataset.ttl", "turtle")
+    parsed = util.load_file_into_model("tests/data/simple-void.ttl", fmt="turtle")
 
     assert isinstance(parsed, RDF.Model)
 
 def test_cant_load_a_file_into_a_model_of_the_wrong_format():
-    parsed = util.load_file_into_model("void-dataset.ttl")
+    parsed = util.load_file_into_model("tests/data/simple-void.ttl")
 
     assert parsed is None
 
