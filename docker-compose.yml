@@ -14,6 +14,8 @@ worker:
     - ./www:/www
     - ./d1lod:/d1lod
     - ./glharvest:/glharvest
+  environment:
+    - PYTHONPATH='$PYTHONPATH:/glharvest:/d1lod/
 
 scheduler:
   build: scheduler
@@ -24,6 +26,9 @@ scheduler:
     - ./d1lod:/d1lod
     - ./glharvest:/glharvest
     - ./www:/www
+  environment:
+    - PYTHONPATH='$PYTHONPATH:/glharvest:/d1lod/
+
 graphdb:
   image: tomcat:8.0-jre8
   ports:
