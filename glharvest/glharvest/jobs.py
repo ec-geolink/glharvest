@@ -17,19 +17,11 @@ SESAME_HOST = os.getenv('GRAPHDB_PORT_8080_TCP_ADDR', 'localhost')
 SESAME_PORT = os.getenv('GRAPHDB_PORT_8080_TCP_PORT', '8080')
 SESAME_REPOSITORY = 'test'
 
-def main_job():
-    """The main worker method for the Harvest System.
 
-    1. Parse the registry file.
-    2. For each provider in the registry,
-        2a. Try to find their VoID file
-        2b. Parse that VoID file
-        2c. Determine if work needs to be done
-            2c1. If none, go to the next provider
-            2c2. If the modified time is different
-                2c2a. Grab the data dump
-                2c2b. Import the triples
-                2c2c. Update the registry
+def update():
+    """Update the contents of the Harvester.
+
+    Reads the registry file and does work depending on what it finds.
     """
 
     # Parse registry file
@@ -113,7 +105,7 @@ def main_job():
                 print "datadump has not been updated since the last visit. Doing nothing."
 
 
-def export_job():
+def export():
     """Export the repository as Turtle."""
 
     s = Store(SESAME_HOST, SESAME_PORT)
@@ -124,7 +116,7 @@ def export_job():
         f.write(exported_text.encode('utf-8'))
 
 
-def status_job():
+def status():
     """Gets the status of the system and prints to stdout."""
     print "Getting the status of the system."
 
