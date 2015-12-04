@@ -3,3 +3,4 @@ rq==0.5.6
 redis==2.10.5
 requests==2.7.0
 PyYAML==3.11
+python-dateutil==2.1
