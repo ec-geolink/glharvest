@@ -71,6 +71,12 @@ def update():
         else:
             registry_modified = registry_file[provider]['modified']
 
+            # Convert dates to datetimes
+            if isinstance(registry_modified, datetime.date):
+                registry_modified = datetime.datetime(registry_modified.year,
+                                                      registry_modified.month,
+                                                      registry_modified.day)
+
         # Get and parse the VoID file
         try:
             r = requests.get(voidfile)
