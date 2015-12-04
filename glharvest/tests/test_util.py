@@ -43,7 +43,7 @@ def test_can_load_a_string_into_a_model():
 	"""
 
 
-	parsed = util.load_string_into_model(turtle, format="turtle")
+	parsed = util.load_string_into_model(turtle, fmt="turtle")
 
 	assert parsed is not None
 
@@ -53,6 +53,6 @@ def test_cant_load_a_bogus_string_into_a_model():
 	"""
 
 
-	parsed = util.load_string_into_model(turtle, format="turtle")
+	parsed = util.load_string_into_model(turtle, fmt="turtle")
 
 	assert parsed is None

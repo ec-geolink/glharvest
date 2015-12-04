@@ -36,7 +36,7 @@ def create_empty_model():
     return model
 
 
-def load_string_into_model(rdfstring, format="rdfxml"):
+def load_string_into_model(rdfstring, fmt="rdfxml"):
     """Load a remote file into an RDF Model
 
     Arguments:
@@ -44,7 +44,7 @@ def load_string_into_model(rdfstring, format="rdfxml"):
     rdfstring : str
         HTTP URI of a file
 
-    format : str
+    fmt : str
 
         One of:
             - rdfxml
@@ -60,7 +60,7 @@ def load_string_into_model(rdfstring, format="rdfxml"):
 
     # Create a Parser
     try:
-        parser = RDF.Parser(name=format)
+        parser = RDF.Parser(name=fmt)
     except:
         print "Failed to create RDF.Parser."
         return None
@@ -75,7 +75,7 @@ def load_string_into_model(rdfstring, format="rdfxml"):
     return model
 
 
-def load_file_into_model(filename, format="rdfxml"):
+def load_file_into_model(filename, fmt="rdfxml"):
     """Load a file containing RDF into a Model.
 
     Arguments:
@@ -84,7 +84,7 @@ def load_file_into_model(filename, format="rdfxml"):
 
         A relative (to script execution) filepath for a file.
 
-    format : str
+    fmt : str
 
         One of:
             - rdfxml
@@ -101,7 +101,7 @@ def load_file_into_model(filename, format="rdfxml"):
 
     # Create a Parser
     try:
-        parser = RDF.Parser(name=format)
+        parser = RDF.Parser(name=fmt)
     except:
         print "Failed to create RDF.Parser."
         return None
