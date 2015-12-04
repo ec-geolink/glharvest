@@ -8,6 +8,7 @@ WORKDIR /usr/local/scheduler
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY start.sh start.sh
+COPY schedule.py schedule.py
 
-CMD [ "python", "-u", "schedule.py" ]
+CMD [ "sh", "start.sh" ]

@@ -8,6 +8,7 @@ WORKDIR /usr/local/worker
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY start.sh start.sh
+COPY work.py work.py
 
-CMD [ "python", "-u", "work.py" ]
+CMD [ "sh", "start.sh" ]
