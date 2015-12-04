@@ -1,4 +1,4 @@
-.PHONY: clean
+.PHONY: clean test
 
 all: clean sync
 
@@ -10,8 +10,11 @@ clean:
 sync:
 	rm -r d1lod
 	cp -R ~/src/d1lod/d1lod/ d1lod
-	
+
 docs: FORCE
 	cd docs && $(MAKE)
 
 FORCE:
+
+test:
+	cd glharvest && py.test 
