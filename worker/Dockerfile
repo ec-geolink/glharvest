@@ -8,6 +8,6 @@ WORKDIR /usr/local/worker
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY . /usr/local/worker
+COPY . .
 
 CMD [ "python", "-u", "work.py" ]

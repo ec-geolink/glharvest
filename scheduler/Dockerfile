@@ -5,9 +5,9 @@ RUN apt-get update && apt-get install -y python-librdf
 
 WORKDIR /usr/local/scheduler
 
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-ADD . .
+COPY . .
 
 CMD [ "python", "-u", "schedule.py" ]
