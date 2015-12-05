@@ -9,12 +9,7 @@ import requests
 import urllib
 import datetime
 from dateutil.parser import parse
-
-try:
-    import RDF
-except ImportError:
-    import sys
-    sys.path.append('/usr/lib/python2.7/dist-packages/')
+import RDF
 
 from d1lod.sesame import Store, Repository
 from glharvest import registry, void, util

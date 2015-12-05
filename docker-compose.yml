@@ -11,11 +11,11 @@ worker:
       - graphdb
       - redis
   volumes:
-    - ./www:/www
     - ./d1lod:/d1lod
     - ./glharvest:/glharvest
+    - ./www:/www
   environment:
-    - PYTHONPATH='$PYTHONPATH:/glharvest:/d1lod/
+    - PYTHONPATH=$PYTHONPATH:/glharvest:/d1lod/:/usr/lib/python2.7/dist-packages
 
 scheduler:
   build: scheduler
@@ -27,7 +27,7 @@ scheduler:
     - ./glharvest:/glharvest
     - ./www:/www
   environment:
-    - PYTHONPATH='$PYTHONPATH:/glharvest:/d1lod/
+    - PYTHONPATH=$PYTHONPATH:/glharvest:/d1lod/:/usr/lib/python2.7/dist-packages
 
 graphdb:
   image: tomcat:8.0-jre8

@@ -3,15 +3,10 @@
 Test functions located in the util module.
 """
 
-try:
-    import RDF
-except ImportError:
-    import sys
-    sys.path.append('/usr/lib/python2.7/dist-packages/')
-
 import RDF
 
 from glharvest import util
+
 
 def test_can_load_a_file_into_a_model():
     parsed = util.load_file_into_model("tests/data/simple-void.ttl", fmt="turtle")

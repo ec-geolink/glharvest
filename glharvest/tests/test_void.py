@@ -4,12 +4,6 @@ Test the parsing of VoID dump files.
 
 """
 
-try:
-    import RDF
-except ImportError:
-    import sys
-    sys.path.append('/usr/lib/python2.7/dist-packages/')
-
 import RDF
 
 from glharvest import util, void
