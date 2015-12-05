@@ -85,7 +85,7 @@ def update():
         if voidfile.endswith('ttl'):
             void_string_format = 'turtle'
 
-        model = util.load_string_into_model(r.text, format=void_string_format)
+        model = util.load_string_into_model(r.text, fmt=void_string_format)
         void_model = void.parse_void_model(model)
 
         print void_model
