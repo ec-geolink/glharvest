@@ -1,6 +1,6 @@
 .PHONY: clean test
 
-all: clean sync
+all: clean sync docs
 
 clean:
 	find . -name '*.pyc' -exec rm -f {} +
@@ -17,4 +17,4 @@ docs: FORCE
 FORCE:
 
 test:
-	cd glharvest && py.test 
+	cd glharvest && py.test
