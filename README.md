@@ -50,7 +50,7 @@ Additionally, because the importing process attempts to delete existing triples,
 Full vs. Partial dumps are distinguished by the presence of a `void:Feature` triple in the provider's [VoID Dataset File](#void-dataset-file).
 
 
-## The Registry File
+## Registry File
 
 The Registry File is a YAML-formatted file stored in this repository. It is updated manually. For each provider in the registry, there is a name, and two fields: 'modified' and 'void'.
 
