@@ -17,14 +17,13 @@ from glharvest import registry, void, util
 # RQ
 from redis import StrictRedis
 from rq import Queue
+
 conn = StrictRedis(host='redis', port='6379')
 q = Queue(connection=conn)
 
-SESAME_HOST = os.getenv('GRAPHDB_PORT_8080_TCP_ADDR', 'localhost')
-SESAME_PORT = os.getenv('GRAPHDB_PORT_8080_TCP_PORT', '8080')
-SESAME_REPOSITORY = 'test'
 SESAME_HOST = os.getenv('WEB_1_PORT_8080_TCP_ADDR', 'localhost')
 SESAME_PORT = os.getenv('WEB_1_PORT_8080_TCP_PORT', '8080')
+SESAME_REPOSITORY = 'glharvest'
 
 
 def update():
@@ -36,7 +35,12 @@ def update():
     print "job.update()"
     print "Parsing registry file."
 
-    registry_filepath = '/glharvest/registry.yml'
+    # Establish the location of the registry file
+    # The else case will run when not running in a container
+    if os.path.isfile('/glharvest/registry.yml'):
+        registry_filepath = '/glharvest/registry.yml'
+    else:
+        registry_filepath = 'registry.yml'
 
     if not os.path.isfile:
         print "Couldn't locate the registry file at the provided path: %s. Exiting." % registry_filepath
@@ -67,14 +71,15 @@ def update():
             registry_modified = None
         else:
             registry_modified = registry_file[provider]['modified']
+            print registry_modified
+            registry_modified = parse(str(registry_modified), ignoretz=True)
 
-            # Convert dates to datetimes
-            if isinstance(registry_modified, datetime.date):
-                registry_modified = datetime.datetime(registry_modified.year,
-                                                      registry_modified.month,
-                                                      registry_modified.day)
+            print registry_modified
+        print "Registry has a last modified value of %s." % registry_modified
 
         # Get and parse the VoID file
+        print "Attemting to retrieve VoID file from location %s." % voidfile
+
         try:
             r = requests.get(voidfile)
         except:
@@ -87,6 +92,7 @@ def update():
         if voidfile.endswith('ttl'):
             void_string_format = 'turtle'
 
+        print "Loading VoID file"
         model = util.load_string_into_model(r.text, fmt=void_string_format)
         void_model = void.parse_void_model(model)
 
@@ -106,7 +112,7 @@ def update():
             modified = void_model[provider_dataset]['modified']
 
             try:
-                modified = parse(modified)
+                modified = parse(modified, ignoretz=True)
             except:
                 print "Failed to parse modified time string of %s. Skipping." % modified
                 continue
@@ -130,7 +136,7 @@ def update():
                     print "Processing %s %s %s." % (provider, provider_dataset, dump)
 
                     # Create a temporary name for the file
-                    outfilename = str(datetime.datetime.now())
+                    outfilename = datetime.datetime.now().strftime("%s-%f")
 
                     try:
                         # resp = requests.get(dump)
@@ -146,26 +152,30 @@ def update():
                     if dump.endswith('ttl'):
                         dump_file_format = 'turtle'
 
-                    parser = RDF.Parser(name=dump_file_format)
+                    # parser = RDF.Parser(name=dump_file_format)
 
                     # Delete triples about each subject (streaming)
-                    for statement in parser.parse_as_stream('file:' + outfilename):
-                        # Don't delete statements about non_URI subjects because
-                        # we can't
-                        if not statement.subject.is_resource():
-                            continue
+                    # for statement in parser.parse_as_stream('file:' + outfilename):
+                    #     # Don't delete statements about non_URI subjects because
+                    #     # we can't
+                    #     if not statement.subject.is_resource():
+                    #         continue
 
-                        print "Deleting triples in context %s about %s." % (provider, str(statement.subject))
-                        r.delete_triples_about(statement.subject, context=provider)
+                        # print "Deleting triples in context %s about %s." % (provider, str(statement.subject))
+                        # r.delete_triples_about(statement.subject, context=provider)
 
                     # Import the file
-                    print "Importing %s into %s." % (outfilename, provider)
+                    print "Importing temp file '%s' into named graph '%s'." % (outfilename, provider)
                     r.import_from_file(outfilename, context=provider, fmt=dump_file_format)
+
+                    # Delete the temp file
+                    os.remove(outfilename)
 
 
                 # Update registry file on disk
-                # registry_file[provider]['modified'] = datetime.date.today()
-                # registry.save_registry("registry.yml", registry_file)
+                print "Updating registry with new modified datetime of %s." % modified
+                registry_file[provider]['modified'] = modified
+                registry.save_registry("registry.yml", registry_file)
             else:
                 print "datadump has not been updated since the last visit. Doing nothing."
 
@@ -176,7 +186,7 @@ def export():
     s = Store(SESAME_HOST, SESAME_PORT)
     r = Repository(s, SESAME_REPOSITORY)
 
-    with open('/www/export', 'wb') as f:
+    with open('/www/export.ttl', 'wb') as f:
         exported_text = r.export()
         f.write(exported_text.encode('utf-8'))
 
