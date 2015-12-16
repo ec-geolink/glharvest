@@ -1,5 +1,4 @@
-# Harvester Proposal
-This proposal describes the GeoLink Harvest System (Harvester)
+# GeoLink Harvest System
 
 ## Table of Contents
 
@@ -178,4 +177,4 @@ This document is in progress. Some of the action items are listed below:
 
 - Discuss how the queue handles backlogs. For example, if the case arises where it takes four days to process a dump but the provider changes their graph daily and we check for changes daily what do we do?
 - Discuss access control issues. It's import that a provider can't push changes to another provider's named graph by changing the contents of their VoID dump file. The fix for this could be as simple as making the registration process fix the location of the VoID with a named graph and checking this at harvest-time.
-- The harvest system has to coordinate telling providers that their partial dump has been harvested. Design a solution and include it in the proposal.
+- The harvest system has to coordinate telling providers that their partial dump has been harvested. Design a solution and include it in the documentation.
