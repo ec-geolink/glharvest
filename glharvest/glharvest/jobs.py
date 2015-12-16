@@ -23,6 +23,8 @@ q = Queue(connection=conn)
 SESAME_HOST = os.getenv('GRAPHDB_PORT_8080_TCP_ADDR', 'localhost')
 SESAME_PORT = os.getenv('GRAPHDB_PORT_8080_TCP_PORT', '8080')
 SESAME_REPOSITORY = 'test'
+SESAME_HOST = os.getenv('WEB_1_PORT_8080_TCP_ADDR', 'localhost')
+SESAME_PORT = os.getenv('WEB_1_PORT_8080_TCP_PORT', '8080')
 
 
 def update():

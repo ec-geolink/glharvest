@@ -1,9 +1,12 @@
+import sys
 import time
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from redis import StrictRedis
 from rq import Worker, Queue, Connection
+
+from glharvest import jobs
 
 conn = StrictRedis(host='redis', port='6379')
 

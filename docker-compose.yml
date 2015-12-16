@@ -1,14 +1,18 @@
-nginx:
-  image: nginx:1.9.7
+# apache httdp + tomcat
+web:
+  build: web
   ports:
     - "80:80"
+    - "8080:8080"
   volumes:
-    - ./www:/usr/share/nginx/html
+    - ./webapps:/tomcat/webapps
+    - ./www:/var/www
+  restart: always
 
 worker:
   build: worker
   links:
-      - graphdb
+      - web
       - redis
   volumes:
     - ./d1lod:/d1lod
@@ -16,11 +20,12 @@ worker:
     - ./www:/www
   environment:
     - PYTHONPATH=$PYTHONPATH:/glharvest:/d1lod/:/usr/lib/python2.7/dist-packages
+  restart: always
 
 scheduler:
   build: scheduler
   links:
-    - graphdb
+    - web
     - redis
   volumes:
     - ./d1lod:/d1lod
@@ -28,13 +33,8 @@ scheduler:
     - ./www:/www
   environment:
     - PYTHONPATH=$PYTHONPATH:/glharvest:/d1lod/:/usr/lib/python2.7/dist-packages
-
-graphdb:
-  image: tomcat:8.0-jre8
-  ports:
-    - "8080:8080"
-  volumes:
-    - ./webapps:/usr/local/tomcat/webapps/
+  restart: always
 
 redis:
   image: redis:3.0.5
+  restart: always
