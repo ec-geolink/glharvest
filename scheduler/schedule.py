@@ -26,6 +26,9 @@ def queue_update_job():
 def queue_export_job():
     q.enqueue(glharvest.jobs.export)
 
+@sched.scheduled_job('interval', minutes=1)
+def print_jobs_job():
+    sched.print_jobs()
 
 # Wait a bit for Sesame to start
 time.sleep(10)
