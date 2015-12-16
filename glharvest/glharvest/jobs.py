@@ -152,17 +152,17 @@ def update():
                     if dump.endswith('ttl'):
                         dump_file_format = 'turtle'
 
-                    # parser = RDF.Parser(name=dump_file_format)
+                    parser = RDF.Parser(name=dump_file_format)
 
                     # Delete triples about each subject (streaming)
-                    # for statement in parser.parse_as_stream('file:' + outfilename):
-                    #     # Don't delete statements about non_URI subjects because
-                    #     # we can't
-                    #     if not statement.subject.is_resource():
-                    #         continue
+                    for statement in parser.parse_as_stream('file:' + outfilename):
+                        # Don't delete statements about non_URI subjects because
+                        # we can't
+                        if not statement.subject.is_resource():
+                            continue
 
-                        # print "Deleting triples in context %s about %s." % (provider, str(statement.subject))
-                        # r.delete_triples_about(statement.subject, context=provider)
+                        print "Deleting triples in context %s about %s." % (provider, str(statement.subject))
+                        r.delete_triples_about(statement.subject, context=provider)
 
                     # Import the file
                     print "Importing temp file '%s' into named graph '%s'." % (outfilename, provider)
