@@ -123,6 +123,8 @@ def update():
             features = void_model[provider_dataset]['features']
             print "Found features: %s" % features
 
+            print "Updating dataset if %s is greater than %s." % (modified, registry_modified)
+
             if registry_modified is None or modified > registry_modified:
                 print "Updating dataset %s." % provider_dataset
 
