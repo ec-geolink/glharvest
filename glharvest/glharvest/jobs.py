@@ -181,7 +181,7 @@ def update():
                 # Update registry file on disk
                 print "Updating registry with new modified datetime of %s." % modified
                 registry_file[provider]['modified'] = modified
-                registry.save_registry("registry.yml", registry_file)
+                registry.save_registry("/glharvest/registry.yml", registry_file)
             else:
                 print "datadump has not been updated since the last visit. Doing nothing."
 
