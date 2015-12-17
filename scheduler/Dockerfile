@@ -3,12 +3,11 @@ MAINTAINER Bryce Mecum <brycemecum@gmail.com>
 
 RUN apt-get update && apt-get install -y python-librdf
 
-WORKDIR /usr/local/scheduler
+WORKDIR /scheduler
 
-COPY requirements.txt requirements.txt
+ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY start.sh start.sh
 COPY schedule.py schedule.py
 
-CMD [ "sh", "start.sh" ]
+CMD [ "python", "-u", "schedule.py" ]
