@@ -36,6 +36,10 @@ def update():
     JOB_NAME = "UPDATE"
     logging.info("[%s] Job started.", JOB_NAME)
 
+    # Set up repository connection
+    store = Store(SESAME_HOST, SESAME_PORT)
+    repository = Repository(store, SESAME_REPOSITORY)
+
     # Establish the location of the registry file
     # The else case will run when not running in a container
     if os.path.isfile('/glharvest/registry.yml'):
@@ -122,7 +126,6 @@ def update():
                 print "Updating dataset %s." % provider_dataset
 
                 # Set up repository connection
-                s = Store(SESAME_HOST, SESAME_PORT)
             if registry_modified is not None and modified <= registry_modified:
                 logging.info("[%s] Provider '%s' has not been updated since last update. Continuing on to next provider in registry.", JOB_NAME, provider)
 
