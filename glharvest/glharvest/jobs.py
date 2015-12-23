@@ -132,6 +132,10 @@ def update():
                 s = Store(SESAME_HOST, SESAME_PORT)
                 r = Repository(s, SESAME_REPOSITORY)
 
+                # Just delete all triples in the context
+                print "Deleting triples in context %s." % provider
+                r.delete_triples_about('?s', context=provider)
+
                 data_dumps = void_model[provider_dataset]['dumps']
 
                 for dump in data_dumps:
@@ -165,10 +169,6 @@ def update():
                     #
                     #     print "Deleting triples in context %s about %s." % (provider, str(statement.subject))
                     #     r.delete_triples_about(statement.subject, context=provider)
-
-                    # Just delete all triples in the context
-                    print "Deleting triples in context %s." % provider
-                    r.delete_triples_about('?s', context=provider)
 
                     # Import the file
                     print "Importing temp file '%s' into named graph '%s'." % (outfilename, provider)
