@@ -53,11 +53,6 @@ def update():
         raise Exception("Couldn't locate the registry file at the provided path: %s. Exiting.", registry_filepath)
 
     registry_file = registry.parse_registry_file(registry_filepath)
-
-    if registry_file is None:
-        print "Failed to parse registry file. Exiting."
-        return
-
     logging.info("[%s] Registry file parsed. %d provider(s) found.", JOB_NAME, len(registry_file))
 
     for provider in registry_file:
@@ -81,11 +76,12 @@ def update():
         logging.info("[%s] Provider '%s' was last modified at '%s'.", JOB_NAME, provider, registry_modified)
 
         # Get and parse the VoID file
-        print "Attemting to retrieve VoID file from location %s." % voidfile
+        logging.info("[%s] Attemting to retrieve VoID file from location %s.", JOB_NAME, voidfile)
 
         try:
             r = requests.get(voidfile)
         except:
+            logging.error("[%s] Failed to get voidfile located at `%s`. Skipping.", JOB_NAME, voidfile)
             continue
 
         void_string_format = "rdfxml"
@@ -94,12 +90,11 @@ def update():
         if voidfile.endswith('ttl'):
             void_string_format = 'turtle'
 
-        print "Loading VoID file"
         model = util.load_string_into_model(r.text, fmt=void_string_format)
         void_model = void.parse_void_model(model)
 
-
         for provider_dataset in void_model:
+            logging.info("[%s] Processing provider VoID:Dataset '%s'.", JOB_NAME, provider_dataset)
 
             if 'modified' not in void_model[provider_dataset]:
                 logging.error("[%s] VoID:Dataset found in VoID dump did not have dcterms:modified value. Skipping.", JOB_NAME)
@@ -114,40 +109,44 @@ def update():
             try:
                 modified = parse(modified, ignoretz=True)
             except:
+                logging.error("[%s] Failed to parse modified time string of %s. Skipping.", JOB_NAME, modified)
                 continue
-
 
             # TODO process features
             features = void_model[provider_dataset]['features']
+            logging.info("[%s] Found features: %s", JOB_NAME, features)
 
-            print "Updating dataset if %s is greater than %s." % (modified, registry_modified)
 
-            if registry_modified is None or modified > registry_modified:
-                print "Updating dataset %s." % provider_dataset
-
-                # Set up repository connection
             if registry_modified is not None and modified <= registry_modified:
                 logging.info("[%s] Provider '%s' has not been updated since last update. Continuing on to next provider in registry.", JOB_NAME, provider)
+                continue
 
             # Just delete all triples in the context
             logging.info("[%s] Deleting triples in context %s.", JOB_NAME, provider)
             repository.delete_triples_about('?s', context=provider)
 
+            data_dumps = void_model[provider_dataset]['dumps']
 
             for dump in data_dumps:
+                logging.info("[%s] Processing provider '%s' dataset '%s' dump '%s'.", JOB_NAME, provider, provider_dataset, dump)
 
                 # Create a temporary name for the file
+                outfilename = datetime.datetime.now().strftime("%s-%f")
 
                 try:
                     urllib.urlretrieve(dump, outfilename)
                 except:
                     logging.error("[%s] Failed to fetch the void file at '%s'. Skipping dump file.", JOB_NAME, dump)
+                    continue
 
                 # Decide the format (from looking at the URL string)
+                dump_file_format = "rdfxml"
 
                 # Use another format is we detect a different one
                 if dump.endswith('ttl'):
+                    dump_file_format = 'turtle'
 
+                # parser = RDF.Parser(name=dump_file_format)
 
                 # Delete triples about each subject (streaming)
                 # for statement in parser.parse_as_stream('file:' + outfilename):
@@ -157,17 +156,21 @@ def update():
                 #         continue
                 #
                 #     print "Deleting triples in context %s about %s." % (provider, str(statement.subject))
+                #     r.delete_triples_about(statement.subject, context=provider)
 
                 # Import the file
                 logging.info("[%s] Importing temp file '%s' into named graph '%s'.", JOB_NAME, outfilename, provider)
+                repository.import_from_file(outfilename, context=provider, fmt=dump_file_format)
 
                 # Delete the temp file
+                try:
                     os.remove(outfilename)
                 except:
+                    logging.exception("[%s] Failed to delete temporary file located at '%s'.", JOB_NAME, outfilename)
 
                 # Update registry file on disk
-                print "Updating registry with new modified datetime of %s." % modified
                 registry_file[provider]['modified'] = modified
+                registry.save_registry(registry_filepath, registry_file)
 
 
 def export():
