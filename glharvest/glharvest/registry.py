@@ -14,8 +14,11 @@ def save_registry(filename, registry):
     registry : Dict
     """
 
-    with open(filename, "wb") as registry_file:
-        registry_file.write(yaml.dump(registry, default_flow_style=False))
+    try:
+        with open(filename, "wb") as registry_file:
+            registry_file.write(yaml.dump(registry, default_flow_style=False))
+    except:
+        print "Failed to save registry file at %s." % filename
 
 
 def parse_registry_file(filename):
@@ -34,7 +37,13 @@ def parse_registry_file(filename):
 
     parsed = None
 
-    with open(filename, "rb") as registry_file:
-        parsed = yaml.load(registry_file.read())
+    try:
+        with open(filename, "rb") as registry_file:
+            parsed = yaml.load(registry_file.read())
+    except:
+        print "Failed to parse '%s' as YAML." % filename
 
+    if parsed is None:
+        raise Exception("An error occurred during parsing of YAML file at '%s'." % filename)
+        
     return parsed
