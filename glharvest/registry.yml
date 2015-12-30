@@ -1,7 +1,4 @@
-# commented out bco-dmo until I verify I'm not sending too much
-# traffic their way while testing. Shouldn't be an issue in production though.
-# bcodmo:
-  # void: http://www.bco-dmo.org/rdf/geolink/void
-
+bcodmo:
+  void: http://www.bco-dmo.org/rdf/geolink/void
 d1lod:
   void: http://lod.dataone.org/void.ttl
