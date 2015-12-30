@@ -8,7 +8,6 @@ web:
     - ./webapps:/tomcat/webapps
     - ./www:/var/www
     - ./data/aduna:/root/.aduna/openrdf-sesame
-
   restart: always
 
 worker:
@@ -41,5 +40,4 @@ redis:
   image: redis:3.0.5
   volumes:
     - ./data/redis:/redis
-
   restart: always
