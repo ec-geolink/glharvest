@@ -12,11 +12,14 @@
 
 ## Overview
 
-The Harvester retrieves RDF dumps of datasets from providers, imports them into its triple store, and makes the combined set of named graphs available for further processing (i.e., co-reference resolution).
+The GeoLink Harvest System (Harvester) retrieves RDF dumps of datasets from providers, imports them into its triple store in separate named graphs, and makes the combined set of named graphs available for further processing (i.e., co-reference resolution).
 
-Each provider produces one or more dumps of their data and makes those dumps available to the Harvester over publicly-accesible HTTP endpoints. Each provider also creates a [VoID file](http://www.w3.org/TR/void/#void-file) which references a single `void:Dataset` which allows the Harvester to programmatically harvest each of the provider's individual RDF data dumps (e.g., RDF/XML, Turtle files).
+Each provider produces a dump of their data and makes it dumps available to the Harvester over publicly-accesible HTTP endpoints.
+Each provider also creates a [VoID file](http://www.w3.org/TR/void/#void-file) containing RDF for a single `void:Dataset` and the Harvester uses this to programmatically harvest each of the provider's individual RDF data dumps.
 
-The [Registry File](#registry-file) manages what providers the Harvester will harvest. Every minute, the Harvester reads the contents of the [Registry File](#registry-file) and visits each provider's [VoID file](http://www.w3.org/TR/void/#void-file) to determine whether that provider's data dumps have been updated since the last time the Harvester visited the provider. If there have been updates since the last visit, the Harvester retrieves the data dumps and imports them into the triple store (see [Importing Process](#importing-process) for details).
+Which providers the Harvester retrieves dumps from is controlled by the [Registry File](#registry-file).
+Every minute, the Harvester reads the contents of the [Registry File](#registry-file) and visits each provider's [VoID file](http://www.w3.org/TR/void/#void-file) to determine whether that provider's dataset have been updated since the last time the Harvester visited the provider.
+If there have been updates since the last visit, the Harvester retrieves the data dumps and imports them into the provider's named graph in the triple store (see [Importing Process](#importing-process) for details).
 
 ![harvester provider diagram](./docs/diagrams/harvester-provider.png)
 
@@ -29,7 +32,7 @@ The Harvester transfers each data dump file to its local file system, imports it
 
 ## Importing Process
 
-Each provider's data dumps are stored in per-provider named graphs for isolation and easy further processing.
+Each provider's data dumps are stored in per-provider named graphs for isolation and to assist in further processing.
 If a provider produces multiple dump files, they are imported into a single named graph just as if the provider only produced one.
 
 A key property of the importing process is how statements are handled.
