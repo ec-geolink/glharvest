@@ -41,3 +41,20 @@ redis:
   volumes:
     - ./data/redis:/redis
   restart: always
+
+cadvisor:
+  image: google/cadvisor:latest
+  volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+  ports:
+    - "8888:8080"
+
+rqdashboard:
+  build: rqdashboard
+  links:
+    - redis
+  ports:
+    - "9181:9181"
