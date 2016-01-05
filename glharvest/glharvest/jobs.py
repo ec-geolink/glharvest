@@ -120,8 +120,8 @@ def update():
                 continue
 
             # Just delete all triples in the context
-            logging.info("[%s] Deleting triples in context %s.", JOB_NAME, provider)
-            repository.delete_triples_about('?s', context=provider)
+            # logging.info("[%s] Deleting triples in context %s.", JOB_NAME, provider)
+            # repository.delete_triples_about('?s', context=provider)
 
             data_dumps = void_model[provider_dataset]['dumps']
 
