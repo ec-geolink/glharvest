@@ -3,13 +3,11 @@
 Jobs for the Harvest System.
 """
 
-import sys
 import os
 import requests
 import urllib
 import datetime
 from dateutil.parser import parse
-import RDF
 import logging
 
 from d1lod.sesame import Store, Repository
