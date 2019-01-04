@@ -1,6 +1,6 @@
 APScheduler==3.0.4
 rq==0.5.6
 redis==2.10.5
-requests==2.7.0
-PyYAML==3.11
+requests>=2.20.0
+pyyaml>=4.2b1
 python-dateutil==2.1
